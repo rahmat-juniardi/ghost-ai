@@ -1,3 +1,5 @@
+import { Brain, Users, FileText } from "lucide-react";
+
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
@@ -18,15 +20,15 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
 
           <ul className="mt-4 space-y-4">
             <li className="flex items-start gap-3 text-sm text-text-copy-secondary">
-              <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-accent-primary" />
+              <Brain className="mt-0.5 size-4 shrink-0 text-accent-primary" />
               AI Architecture Generation
             </li>
             <li className="flex items-start gap-3 text-sm text-text-copy-secondary">
-              <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-accent-primary" />
+              <Users className="mt-0.5 size-4 shrink-0 text-accent-primary" />
               Real-time Collaboration
             </li>
             <li className="flex items-start gap-3 text-sm text-text-copy-secondary">
-              <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-accent-primary" />
+              <FileText className="mt-0.5 size-4 shrink-0 text-accent-primary" />
               Instant Spec Generation
             </li>
           </ul>
