@@ -11,11 +11,21 @@ change.
 
 ## Current Goal
 
-- Implement project dialogs per `04-project-dialogs.md`
+- Collaborative canvas — per project roadmap
 
 ## Completed
 
 - Project dialogs (feature spec `04-project-dialogs.md`) — complete
+- Prisma data models (feature spec `05-prisma.md`) — complete
+  - Created `prisma/models/project.prisma` with `Project` and `ProjectCollaborator` models
+    - `Project`: ownerId, name, description (optional), status enum (DRAFT/ARCHIVED), canvasJsonPath, timestamps, indexes on ownerId and createdAt
+    - `ProjectCollaborator`: project relation with cascade delete, email, timestamps, unique constraint on [projectId, email], indexes on email and [projectId, createdAt]
+  - Created `lib/prisma.ts` — cached singleton that branches by DATABASE_URL:
+    - `prisma+postgres://` → Accelerate path via PrismaPg adapter
+    - `postgres://` → direct connection via `@prisma/adapter-pg`
+    - Caches on `globalThis` in non-production
+  - Migration `20260506071903_init` created and applied successfully
+  - Build verified: `npm run build` passes with zero TypeScript errors
   - Created `lib/project-dialogs.ts` with `useProjectDialogs` hook: dialog state, form state, loading state, mock data, slug helper, and `ProjectDialogContext` for passing actions to children
   - Created `components/editor/create-project-dialog.tsx` — project name input with live slug preview that updates as the user types
   - Created `components/editor/rename-project-dialog.tsx` — prefilled input, auto-focuses, Enter submits, shows current project name in description
