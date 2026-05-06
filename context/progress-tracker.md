@@ -63,6 +63,25 @@ change.
   - Added `UserButton` to editor navbar right section
   - Build verified: `npm run build` passes
 
+## Completed
+
+- Wire editor home to real project API (feature spec `07-wire-editor-home.md`) — complete
+  - Created `lib/project-data.ts` — server-side data helper `getProjectList()` that fetches owned projects (via `ownerId`) and shared projects (via collaborator email lookup), returns typed `ProjectList` with `owned`, `shared`, and `ownerId`
+  - Updated `lib/project-dialogs.ts` — removed mock data (`MOCK_PROJECTS`, `MOCK_OWNER_ID`); hook now accepts `{ owned, shared, ownerId }` from server; added real mutation functions:
+    - `createProject()` — POST `/api/projects`, navigates to `/editor/{id}`
+    - `renameProject()` — PATCH `/api/projects/[id]`, calls `router.refresh()`
+    - `deleteProject()` — DELETE `/api/projects/[id]`, redirects to `/editor` if active workspace, otherwise refreshes
+  - Created `components/editor/editor-shell.tsx` — client component extracted from layout, manages sidebar/dialog state and wires all three dialog submit handlers to real mutations
+  - Updated `app/editor/layout.tsx` — converted to async server component that calls `getProjectList()` and passes data to `EditorShell`
+  - Updated `components/editor/create-project-dialog.tsx` — added `onSubmit` prop (create button was previously unconnected), added Enter-key submit, changed slug label to "Room ID" per spec
+  - Updated `components/editor/project-sidebar.tsx` — removed `project.slug` display (slug no longer part of `Project` type; room ID preview is shown in create dialog only)
+  - Updated `prisma/models/project.prisma` — removed `@default(uuid())` from `id`; project ID is now the slug+suffix (the room ID)
+  - Updated `app/api/projects/route.ts` (POST) — generates room ID from slug + 4-char random suffix (e.g. `my-architecture-a7x3`), ensures uniqueness via existence check with retry (max 10 attempts)
+  - Updated `lib/project-dialogs.ts` — renamed preview from `toSlug()` to `toRoomId()` which appends a random 4-char suffix; the preview now shows the exact room ID format (`my-architecture-a7x3`)
+  - Fresh migration `20260506080812_init` — recreated from clean schema
+  - Build verified: `npm run build` passes with zero TypeScript errors
+  - **URL fix:** navigating after create now goes to `/editor/my-architecture-a7x3` instead of `/editor/uuid`
+
 ## In Progress
 
 - None.
@@ -70,6 +89,16 @@ change.
 ## Next Up
 
 - Collaborative canvas — per project roadmap
+
+## Completed
+
+- Project APIs (feature spec `06-project-apis.md`) — complete
+  - `GET /api/projects` — lists current user's projects, sorted by updatedAt desc, returns id/name/status/createdAt/updatedAt
+  - `POST /api/projects` — creates project with Clerk userId as ownerId, defaults missing name to "Untitle Project", uses schema's uuid() ID strategy
+  - `PATCH /api/projects/[projectId]` — renames project, validates non-empty name, enforces owner check (403 for non-owner, 404 if not found)
+  - `DELETE /api/projects/[projectId]` — deletes project, enforces owner check (403 for non-owner, 404 if not found)
+  - All routes return 401 for unauthenticated requests
+  - Build verified: `npm run build` passes with zero TypeScript errors
 
 ## Open Questions
 
@@ -94,10 +123,11 @@ change.
   - Both components compile without TypeScript errors; production build succeeds.
   - Dialog pattern documented: use existing `globals.css` color tokens (e.g., `--bg-elevated` for dialog background, `--border-default` for borders).
 - Auth (feature spec `03-auth.md`) done. Clerk env vars were already in `.env.local` — no rename needed.
-- Project dialogs (feature spec `04-project-dialogs.md`) done.
-  - Key design: central `useProjectDialogs` hook manages all dialog/form/loading state in one place; `ProjectDialogContext` lets the editor home page trigger the create dialog without prop drilling through the layout.
-  - Slug preview in Create dialog uses `toSlug()` helper that lowercases, replaces non-alphanumeric chars with hyphens, and collapses consecutive hyphens.
-  - Sidebar project items show action buttons on hover (Pencil for rename, Trash2 for delete) — only for owned projects.
-  - All three dialogs use `showCloseButton={false}` and provide Cancel/action buttons in a footer row, per the spec.
-  - Mock submit handlers simulate a 500ms delay with `isLoading` state to demonstrate loading behavior.
-- Next up: follow the project roadmap for the next feature.
+- Wire editor home (feature spec `07-wire-editor-home.md`) done.
+  - Key design: server component layout fetches project data via `getProjectList()` and passes it to `EditorShell` client component. The hook `useProjectDialogs` initializes with server data (no client-side fetch for initial load). Mutations call real API routes.
+  - Layout is now an async server component — the data fetching boundary is server-side.
+  - `CreateProjectDialog`'s create button now calls `createProject()` (POST) and navigates to the new workspace.
+  - `RenameProjectDialog` calls `renameProject()` (PATCH) and refreshes the router.
+  - `DeleteProjectDialog` calls `deleteProject()` (DELETE) and redirects to `/editor` if it's the active workspace, otherwise refreshes.
+  - **Room ID fix:** project `id` is now the slug+suffix (e.g. `my-architecture-a7x3`), not a UUID. URL after create is `/editor/my-architecture-a7x3`. The create dialog preview shows the same format.
+- Next up: collaborative canvas — per project roadmap.

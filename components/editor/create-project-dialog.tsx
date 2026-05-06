@@ -17,6 +17,7 @@ interface CreateProjectDialogProps {
   slug: string
   onProjectNameChange: (name: string) => void
   isLoading: boolean
+  onSubmit: () => void
 }
 
 export function CreateProjectDialog({
@@ -26,7 +27,14 @@ export function CreateProjectDialog({
   slug,
   onProjectNameChange,
   isLoading,
+  onSubmit,
 }: CreateProjectDialogProps) {
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && projectName.trim() && !isLoading) {
+      onSubmit()
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -53,6 +61,7 @@ export function CreateProjectDialog({
               placeholder="e.g. Microservice Architecture"
               value={projectName}
               onChange={(e) => onProjectNameChange(e.target.value)}
+              onKeyDown={handleKeyDown}
               autoFocus
             />
           </div>
@@ -60,7 +69,7 @@ export function CreateProjectDialog({
           {slug && (
             <div>
               <p className="mb-1 text-xs font-medium text-text-copy-secondary">
-                Slug
+                Room ID
               </p>
               <p className="rounded-lg border border-border-default bg-bg-subtle px-2.5 py-1.5 font-mono text-sm text-text-copy-muted">
                 {slug}
@@ -73,7 +82,10 @@ export function CreateProjectDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button disabled={!projectName.trim() || isLoading}>
+          <Button
+            disabled={!projectName.trim() || isLoading}
+            onClick={onSubmit}
+          >
             {isLoading ? "Creating…" : "Create"}
           </Button>
         </div>
