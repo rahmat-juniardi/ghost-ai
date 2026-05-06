@@ -1,19 +1,34 @@
 "use client"
 
-import { X, Plus } from "lucide-react"
+import { X, Plus, Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import type { Project } from "@/lib/project-dialogs"
 
 interface ProjectSidebarProps {
   isOpen: boolean
   onClose: () => void
+  projects: Project[]
+  onNewProject: () => void
+  onRename: (project: Project) => void
+  onDelete: (project: Project) => void
 }
 
-export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
+export function ProjectSidebar({
+  isOpen,
+  onClose,
+  projects,
+  onNewProject,
+  onRename,
+  onDelete,
+}: ProjectSidebarProps) {
+  const ownedProjects = projects.filter((p) => p.isOwner)
+  const sharedProjects = projects.filter((p) => !p.isOwner)
+
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop scrim */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50"
@@ -57,25 +72,98 @@ export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
 
             <TabsContent
               value="my-projects"
-              className="mt-4 flex flex-1 items-center justify-center"
+              className="mt-3 flex-1"
             >
-              <p className="text-sm text-text-copy-muted">No projects yet</p>
+              {ownedProjects.length === 0 ? (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-sm text-text-copy-muted">
+                    No projects yet
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-1">
+                  {ownedProjects.map((project) => (
+                    <li
+                      key={project.id}
+                      className="group flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-bg-subtle"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-text-copy-primary">
+                          {project.name}
+                        </p>
+                        <p className="truncate text-xs text-text-copy-faint">
+                          {project.slug}
+                        </p>
+                      </div>
+
+                      {/* Actions (owner only) */}
+                      <div className="ml-2 flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onRename(project)
+                          }}
+                          aria-label={`Rename ${project.name}`}
+                        >
+                          <Pencil className="size-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete(project)
+                          }}
+                          aria-label={`Delete ${project.name}`}
+                        >
+                          <Trash2 className="size-3" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </TabsContent>
 
             <TabsContent
               value="shared"
-              className="mt-4 flex flex-1 items-center justify-center"
+              className="mt-3 flex-1"
             >
-              <p className="text-sm text-text-copy-muted">
-                No shared projects
-              </p>
+              {sharedProjects.length === 0 ? (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-sm text-text-copy-muted">
+                    No shared projects
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-1">
+                  {sharedProjects.map((project) => (
+                    <li
+                      key={project.id}
+                      className="flex items-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-bg-subtle"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-text-copy-primary">
+                          {project.name}
+                        </p>
+                        <p className="truncate text-xs text-text-copy-faint">
+                          {project.slug}
+                        </p>
+                      </div>
+                      {/* No actions for shared projects */}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </TabsContent>
           </Tabs>
         </div>
 
         {/* New Project button */}
         <div className="border-t border-border-default p-3">
-          <Button className="w-full gap-2">
+          <Button className="w-full gap-2" onClick={onNewProject}>
             <Plus className="size-4" />
             New Project
           </Button>

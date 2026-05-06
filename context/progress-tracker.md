@@ -11,10 +11,19 @@ change.
 
 ## Current Goal
 
-- Implement authentication per `03-auth.md`
+- Implement project dialogs per `04-project-dialogs.md`
 
 ## Completed
 
+- Project dialogs (feature spec `04-project-dialogs.md`) — complete
+  - Created `lib/project-dialogs.ts` with `useProjectDialogs` hook: dialog state, form state, loading state, mock data, slug helper, and `ProjectDialogContext` for passing actions to children
+  - Created `components/editor/create-project-dialog.tsx` — project name input with live slug preview that updates as the user types
+  - Created `components/editor/rename-project-dialog.tsx` — prefilled input, auto-focuses, Enter submits, shows current project name in description
+  - Created `components/editor/delete-project-dialog.tsx` — destructive confirmation with no input, confirm button uses `variant="destructive"`
+  - Updated `components/editor/project-sidebar.tsx` — renders mock project lists, shows Pencil/Trash2 actions only for owned projects (hidden for shared/collaborator projects), actions appear on hover, wired New Project button
+  - Updated `app/editor/layout.tsx` — uses hook, provides context, renders all three dialogs, passes mock submit handlers
+  - Updated `app/editor/page.tsx` — editor home screen: heading "Create a project or open an existing one", description, New Project button with Plus icon, no card wrapper, uses context to open create dialog
+  - Build verified: `npm run build` passes with zero TypeScript errors
 - Installed and configured `shadcn/ui` (v4.6.0) with Tailwind v4
 - Installed `lucide-react`, `clsx`, `tailwind-merge`
 - Created `lib/utils.ts` with reusable `cn()` helper
@@ -50,7 +59,7 @@ change.
 
 ## Next Up
 
-- [First editor feature — per project roadmap]
+- Collaborative canvas — per project roadmap
 
 ## Open Questions
 
@@ -75,4 +84,10 @@ change.
   - Both components compile without TypeScript errors; production build succeeds.
   - Dialog pattern documented: use existing `globals.css` color tokens (e.g., `--bg-elevated` for dialog background, `--border-default` for borders).
 - Auth (feature spec `03-auth.md`) done. Clerk env vars were already in `.env.local` — no rename needed.
+- Project dialogs (feature spec `04-project-dialogs.md`) done.
+  - Key design: central `useProjectDialogs` hook manages all dialog/form/loading state in one place; `ProjectDialogContext` lets the editor home page trigger the create dialog without prop drilling through the layout.
+  - Slug preview in Create dialog uses `toSlug()` helper that lowercases, replaces non-alphanumeric chars with hyphens, and collapses consecutive hyphens.
+  - Sidebar project items show action buttons on hover (Pencil for rename, Trash2 for delete) — only for owned projects.
+  - All three dialogs use `showCloseButton={false}` and provide Cancel/action buttons in a footer row, per the spec.
+  - Mock submit handlers simulate a 500ms delay with `isLoading` state to demonstrate loading behavior.
 - Next up: follow the project roadmap for the next feature.
