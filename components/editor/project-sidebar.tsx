@@ -91,9 +91,6 @@ export function ProjectSidebar({
                         <p className="truncate text-text-copy-primary">
                           {project.name}
                         </p>
-                        <p className="truncate text-xs text-text-copy-faint">
-                          {project.slug}
-                        </p>
                       </div>
 
                       {/* Actions (owner only) */}
@@ -147,9 +144,6 @@ export function ProjectSidebar({
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-text-copy-primary">
                           {project.name}
-                        </p>
-                        <p className="truncate text-xs text-text-copy-faint">
-                          {project.slug}
                         </p>
                       </div>
                       {/* No actions for shared projects */}
